@@ -1,0 +1,62 @@
+enable
+configure terminal
+
+1.CREATED VLANS WITH DESCRIPTIVE NAMES
+
+vlan 10
+ name IT_DEPT
+vlan 20
+ name FINANCE_DEPT
+vlan 30
+ name HR_DEPT
+vlan 99
+ name MGMT_NATIVE  ! Best practice: Use a dedicated, unused VLAN for native/management
+exit
+
+2.CONFIGURED ACCESS PORTS (IT Department)
+interface range FastEthernet 0/1 - 2
+ description IT-Dept-Access
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast        ! Prevents 30-second STP delay for end-user devices
+ exit
+
+
+3.CONFIGURED ACCESS PORTS (Finance Department)
+
+interface range FastEthernet 0/3 - 4
+ description Finance-Dept-Access
+ switchport mode access
+ switchport access vlan 20
+ spanning-tree portfast
+ exit
+
+
+4.CONFIGURED ACCESS PORTS (HR Department)
+interface range FastEthernet 0/5 - 6
+ description HR-Dept-Access
+ switchport mode access
+ switchport access vlan 30
+ spanning-tree portfast
+ exit
+
+5.CONFIGURED THE TRUNK LINK TO THE ROUTER
+-
+interface GigabitEthernet 0/1
+ description UPLINK-TO-ROUTER-R1
+ switchport mode trunk
+ switchport trunk native vlan 99               ! Security best practice: Move native VLAN away from default VLAN 1
+ switchport trunk allowed vlan 10,20,30,99     ! Principle of least privilege: Only allow necessary VLANs
+ exit
+
+6.SECURED UNUSED PORTS (Portfolio "Wow" Factor)
+interface range FastEthernet 0/7 - 24
+ description UNUSED-PORTS-SHUTDOWN
+ switchport mode access
+ switchport access vlan 99
+ shutdown                                      ! Prevents unauthorized devices from plugging in
+ exit
+
+ 7.SAVED THE CONFIGURATION
+end
+write memory
