@@ -1,0 +1,49 @@
+   enable
+   configure terminal
+
+   ! Create a virtual interface for VLAN 10 (The IT/Mgmt VLAN)
+   interface vlan 10
+   description MANAGEMENT-INTERFACE
+   ip address 192.168.10.2 255.255.255.0
+   no shutdown
+   exit
+
+   ! Tell the switch where its default gateway is so it can talk to other subnets
+   ip default-gateway 192.168.10.1
+
+   ! Open the port for the server and put it in VLAN 10
+   interface FastEthernet 0/7
+   description NOC-MONITORING-SERVER
+   switchport mode access
+   switchport access vlan 10
+   spanning-tree portfast
+   no shutdown
+   exit
+
+   end
+   write memory
+
+
+configure terminal
+
+! 1. SYSLOG (Centralized Event Logging)
+! Tell the switch to send logs to the server's IP
+logging host 192.168.10.50
+
+! Add timestamps to logs so we know exactly when things happen
+service timestamps log datetime msec
+
+
+! 2. SNMP (Simple Network Management Protocol)
+! Create the "password" (community string) for the server to read data
+snmp-server community NexoraMonitor RO
+
+! Enable the switch to send SNMP alerts (traps)
+snmp-server enable traps
+
+! (Optional but looks great on a portfolio) Add physical location metadata
+snmp-server location "Nexora HQ - Rack 4"
+snmp-server contact "admin@nexora.local"
+
+exit
+write memory
